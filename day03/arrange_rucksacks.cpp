@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <vector>
 
 
 char find_double_item(std::string line) {
@@ -22,9 +23,26 @@ char find_double_item(std::string line) {
         {
             return c;
         }
-        
+    }
+}
+
+char find_triple_item(std::string line1, std::string line2, std::string line3) {
+    std::vector<char> common_chars;
+    
+    for (int i = 0; i < line1.length(); i++) {
+        char c = line1[i];
+        if (line2.contains(c)){
+            common_chars.push_back(c);
+        }
     }
 
+    for (int i = 0; i < common_chars.size(); i++)
+    {
+        char c = common_chars[i];
+        if (line3.contains(c)) {
+            return c;
+        }
+    }
 }
 
 int score_char(char letter) {
@@ -55,11 +73,27 @@ int part_1() {
     return score;
 }
 
+int part_2() {
+    std::ifstream input("input.txt");
 
+    std::string line1, line2, line3;
+    int score = 0;
+
+    while (getline(input, line1) && getline(input, line2) && getline(input, line3)) {
+        char badge = find_triple_item(line1, line2, line3);
+        score += score_char(badge);
+    }
+
+    return score;
+}
 
 int main() {
     int score = part_1();
-
     std::cout << score << std::endl;
+
+    int score2 = part_2();
+    std::cout << score2 << std::endl;
+
+
     return 0;
 }
