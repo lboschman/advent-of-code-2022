@@ -42,16 +42,31 @@ int calc_score(char opponent, char you) {
     score_to_points[2] = 0;
 
     int score = shape_score[you] + 1;
-
     int result = score_to_points[shape_score[you] - shape_score[opponent]] ;
-
-    int out = score + result;
-
-    // std::cout << out << std::endl;
 
     return score + result;
 }
 
+
+char calc_hand(char opponent, char strategy) {
+    std::map<char, int> shape_score;
+    std::map<int, char> score_to_hand;
+
+    shape_score['A'] = 0;
+    shape_score['B'] = 1;
+    shape_score['C'] = 2;
+    shape_score['X'] = -1;
+    shape_score['Y'] = 0;
+    shape_score['Z'] = 1;
+    
+    score_to_hand[0] = 'X';
+    score_to_hand[1] = 'Y';
+    score_to_hand[2] = 'Z';
+
+    char new_hand = score_to_hand[(shape_score[opponent] + shape_score[strategy] + 9) % 3];
+
+    return new_hand;
+}
 
 int part_1() {
     std::ifstream input("input.txt");
@@ -63,14 +78,27 @@ int part_1() {
     {
         score += calc_score(opponent, you);
         line += 1;
-
     }
 
     std::cout << line << std::endl;
-    
-
     return score;
 
+}
+
+int part_2() {
+    std::ifstream input("input.txt");
+
+    char opponent, lose_draw_win, you;
+    int score = 0;
+
+    while (input >> opponent >> lose_draw_win)
+    {
+        you = calc_hand(opponent, lose_draw_win);
+        score += calc_score(opponent, you);
+    }
+
+    return score;
+    
 }
 
 
@@ -78,9 +106,10 @@ int part_1() {
 int main() {
 
     int score_1 = part_1();
-
     std::cout << score_1 << std::endl;
 
+    int score_2 = part_2();
+    std::cout << score_2 << std::endl;
     
     return 0;
 }
