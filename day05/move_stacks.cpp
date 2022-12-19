@@ -60,6 +60,22 @@ public:
         
     }
 
+    void move_simultaneous_containers(int origin, int destination, int quantity) {
+        int orig = origin - 1;
+        int dest = destination - 1;
+        
+        container_stack intermediate_stack ;
+
+        for (int i = 0; i < quantity; i++) {
+            intermediate_stack.add_container(stacks[orig].remove_container());
+        }
+
+        for (int i = 0; i < quantity; i++) {
+            stacks[dest].add_container(intermediate_stack.remove_container());
+        }
+        
+    }
+
     void add_stack() {
         container_stack new_stack;
         stacks.push_back(new_stack);
@@ -127,11 +143,16 @@ multi_stacks parse_input() {
 
         std::vector<int> instructions;
         for (int i = 1; i < 6; i += 2) {
-            std::cout << linelist[i] << std::endl;
             instructions.push_back(std::stoi(linelist[i]));
         }
         
-        stacks.move_multiple_containers(
+        // stacks.move_multiple_containers(
+        //     instructions[1], 
+        //     instructions[2],
+        //     instructions[0]
+        // );
+
+        stacks.move_simultaneous_containers(
             instructions[1], 
             instructions[2],
             instructions[0]
