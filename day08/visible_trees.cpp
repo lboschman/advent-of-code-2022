@@ -75,10 +75,72 @@ int check_visible(std::vector<std::vector<int>> data, int x, int y) {
   }
 }
 
+int line_scenic_score(std::vector<int> line, int pos, bool positive=true) {
+  int scenic_score = 1;
+  int height = line[pos];
+  int size = line.size();
+
+  if (positive) {
+    int cursor = pos + 1;
+    while (line[cursor] < height && cursor < size) {
+      scenic_score++;
+      cursor++;
+    }
+
+    if (cursor == size) {
+      scenic_score--;
+    }
+  } else {
+    int cursor = pos - 1;
+    while (line[cursor] < height && cursor >= 0) {
+      scenic_score++;
+      cursor--;
+    }
+
+    if (cursor < 0) {
+      scenic_score--;
+    }
+  }
+
+  // std::cout << "Tree of height " << height << " at pos " << pos << " has scenic score " << scenic_score;
+  // if (positive) {
+  //   std::cout << " in positive direction" << std::endl;
+  // } else {
+  //   std::cout << " in negative direction" << std::endl;
+  // }
+
+  // std::cout << "Vector used: ";
+  // for (int el : line) {
+  //   std::cout << el << " ";
+  // } 
+  // std::cout << std::endl;
+  return scenic_score;
+}
+
 int calc_scenic_score(std::vector<std::vector<int>> data, int x, int y) {
+  int height = data[x][y];
+  int size0 = data.size();
+  int size1 = data[0].size();
 
+  if (x == 0 || x == size0 - 1 || y == 0 || y == size1 - 1) {
+    return 0;
+  }
 
-  return 0;
+  std::vector<int> x_vec = data[x];
+
+  std::vector<int> y_vec = {};
+  for (std::vector<int> row : data) {
+    y_vec.push_back(row[y]);
+  }
+  // std::cout << "Tree at (" << x << ", " << y << ") of height " << height << std::endl;
+  int scenic_score = 1;
+  scenic_score *= line_scenic_score(x_vec, y, true);
+  scenic_score *= line_scenic_score(x_vec, y, false);
+  scenic_score *= line_scenic_score(y_vec, x, true);
+  scenic_score *= line_scenic_score(y_vec, x, false);
+
+  // std::cout << "==============================" << std::endl;
+  return scenic_score;
 }
 
 void part1() {
