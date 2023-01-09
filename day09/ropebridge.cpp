@@ -3,19 +3,8 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <sstream>
 
-
-struct Position {
-  int x;
-  int y;
-
-  Position(int px, int py) {
-    x = px;
-    y = py;
-  }
-
-  bool operator==(const Position&) const = default;
-};
 
 class RopeEnd {
   public:
@@ -57,8 +46,6 @@ class RopeEnd {
         x++;
         break;
       }
-
-      log_position();
     }
 
     void follow(int follow_x, int follow_y) {
@@ -109,8 +96,7 @@ class RopeEnd {
 std::vector<std::string> RopeEnd::visited_positions = {};
 
 void part_1() {
-  std::ifstream input("input.txt");
-
+  // setup rope ends
   RopeEnd::reset_log();
 
   RopeEnd head = RopeEnd(0, 0);
@@ -119,44 +105,27 @@ void part_1() {
   head.follower = &tail;
 
 
+  // setup variables for loop
+  std::ifstream input("input.txt");
+  std::string line;
+  char direction; int steps;
+
+  while (getline(input, line)) {
+    std::stringstream string_in(line);
+    string_in >> direction >> steps;
+    head.move(direction, steps);
+    // std::cout << direction << ", " << steps << std::endl;
+  }
+
+  std::cout << head.number_visited_positions() << std::endl;
+
+
 }
 
 
 
 int main() {
-
-  RopeEnd::reset_log();
-
-
-  RopeEnd pos = RopeEnd(1, 5);
-  RopeEnd tail = RopeEnd(0, 5);
-
-  pos.follower = &tail;
-
-  pos.log_position();
-
-  std::cout << pos.x << ", " << pos.y << std::endl;
-  std::cout << tail.x << ", " << tail.y << std::endl;
-  std::cout << "Visited positions: " << pos.number_visited_positions() << std::endl;
-  std::cout << "==========" << std::endl;
-
-  pos.move('U', 3);
-  std::cout << pos.x << ", " << pos.y << std::endl;
-  std::cout << tail.x << ", " << tail.y << std::endl;
-  std::cout << "Visited positions: " << pos.number_visited_positions() << std::endl;
-  std::cout << "==========" << std::endl;
-
-  pos.move('L', 3);
-  std::cout << pos.x << ", " << pos.y << std::endl;
-  std::cout << tail.x << ", " << tail.y << std::endl;
-  std::cout << "Visited positions: " << pos.number_visited_positions() << std::endl;
-  std::cout << "==========" << std::endl;
-
-  pos.move('R', 3);
-  std::cout << pos.x << ", " << pos.y << std::endl;
-  std::cout << tail.x << ", " << tail.y << std::endl;
-  std::cout << "Visited positions: " << pos.number_visited_positions() << std::endl;
-  std::cout << "==========" << std::endl;
+  part_1();
 
   return 0;
 }
