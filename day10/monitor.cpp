@@ -10,6 +10,7 @@ class Monitor {
     int X = 1;
 
     int cumulative_signal_strength = 0;
+    bool draw = false;
 
     Monitor() {
       cycle = 1;
@@ -22,8 +23,14 @@ class Monitor {
         cumulative_signal_strength += cycle * X;
       }
 
+      if (draw) {
+        draw_pixel();
+      }
+
       cycle++;
     }
+
+    void draw_pixel() {}
 
     void noop() {
       cycle_monitor();
@@ -53,6 +60,23 @@ void part_1() {
   }
 
   std::cout << monitor.cumulative_signal_strength << std::endl;
+}
+
+void part_2() {
+  Monitor monitor = Monitor();
+  std::ifstream input("input.txt");
+  std::string line, command;
+  int argument;
+
+  while (getline(input, line)) {
+    std::stringstream stream(line);
+    stream >> command >> argument;
+    if (command=="noop") {
+      monitor.noop();
+    } else {
+      monitor.addx(argument);
+    }
+  }
 }
 
 
