@@ -11,12 +11,20 @@ class RopeEnd {
     int x;
     int y;
     RopeEnd* follower = nullptr;
+    bool log_motion;
 
     static std::vector<std::string> visited_positions;
 
-    RopeEnd(int px, int py) {
+    RopeEnd() {
+      x = 0;
+      y = 0;
+      log_motion = false;
+    }
+
+    RopeEnd(int px, int py, bool p_log_motion=false) {
       x = px;
       y = py;
+      log_motion = p_log_motion;
     }
 
     void move(char direction, int steps) {
@@ -45,26 +53,49 @@ class RopeEnd {
       case 'R':
         x++;
         break;
+      // diagonal moves are based on clock numbers:
+      // T (ten) for top-left
+      // O (one) for top-right
+      // F (four) for bottom-right
+      // S (seven) for bottom-left
+      case 'T':
+        x--; y++;
+        break;
+      case 'O':
+        x++; y++;
+        break;
+      case 'F':
+        x++; y--;
+        break;
+      case 'S':
+        x--; y--;
+        break;
+      }
+
+      if (log_motion) {
+        log_position();
       }
     }
 
     void follow(int follow_x, int follow_y) {
+      int x_dir = follow_x - x; 
+      int y_dir = follow_y - y;
       if (x==follow_x && y==follow_y) {
         // do nothing
-      } else if (x==follow_x && std::abs(y - follow_y) > 1) {
+      } else if (x==follow_x && std::abs(y_dir) > 1) {
         // move along y-axis
-        y += (follow_y - y) / std::abs(y - follow_y);
-      } else if (y==follow_y && std::abs(x - follow_x) > 1) {
+        (y_dir < 0) ? move('D', 1) : move('U', 1);
+        
+      } else if (y==follow_y && std::abs(x_dir) > 1) {
         // move along x-axis
-        x += (follow_x - x) / std::abs(x - follow_x);
-      } else if ((std::abs(x - follow_x) + std::abs(y - follow_y)) > 2) {
+        (x_dir < 0) ? move('L', 1) : move('R', 1);
+      } else if ((std::abs(x_dir) + std::abs(y_dir)) > 2) {
         // move diagonally
-        x += (follow_x - x) / std::abs(follow_x - x);
-        y += (follow_y - y) / std::abs(follow_y - y);
+        if (x_dir < 0 && y_dir > 0) { move('T', 1); }
+        if (x_dir > 0 && y_dir > 0) { move('O', 1); }
+        if (x_dir > 0 && y_dir < 0) { move('F', 1); }
+        if (x_dir < 0 && y_dir < 0) { move('S', 1); }
       }
-      
-      log_position();
-
     }
 
     std::string to_string() {
@@ -78,9 +109,10 @@ class RopeEnd {
     }
 
     int number_visited_positions() {
+      // make a copy to not alter the original data
       std::vector<std::string> vispos = visited_positions;
 
-      // get the unique positions
+      // remove duplicate positions
       std::sort(vispos.begin(), vispos.end());
       vispos.erase(std::unique(vispos.begin(), vispos.end()), vispos.end());
 
@@ -93,6 +125,7 @@ class RopeEnd {
 
 };
 
+// initialize static variable
 std::vector<std::string> RopeEnd::visited_positions = {};
 
 void part_1() {
@@ -101,8 +134,10 @@ void part_1() {
 
   RopeEnd head = RopeEnd(0, 0);
   RopeEnd tail = RopeEnd(0, 0);
-
+  tail.log_motion = true;
   head.follower = &tail;
+
+  tail.log_position();
 
 
   // setup variables for loop
@@ -118,14 +153,49 @@ void part_1() {
   }
 
   std::cout << head.number_visited_positions() << std::endl;
-
-
 }
 
+void part_2(int n_knots=1) {
+  // setup rope ends
+  RopeEnd::reset_log();
 
+  RopeEnd knots[10] = {};
+
+  for (int i = 0; i < n_knots; i++) {
+    knots[i] = RopeEnd(0,0);
+
+    // assign followers
+    if (i > 0) {
+      knots[i - 1].follower = &(knots[i]);
+    }
+
+    // log the positions of the last knot
+    if (i == n_knots - 1)
+    {
+      knots[i].log_motion = true;
+      knots[i].log_position();
+    }
+    
+  }
+    
+  // setup variables for loop
+  std::ifstream input("input.txt");
+  std::string line;
+  char direction; int steps;
+
+  while (getline(input, line)) {
+    std::stringstream string_in(line);
+    string_in >> direction >> steps;
+    // move the head
+    knots[0].move(direction, steps);
+  }
+
+  std::cout << knots[0].number_visited_positions() << std::endl;
+}
 
 int main() {
   part_1();
+  part_2(10);
 
   return 0;
 }
