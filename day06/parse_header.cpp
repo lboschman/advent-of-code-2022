@@ -31,5 +31,7 @@ int main () {
 
     std::cout << find_header_position(line, 4) << std::endl;
 
+    std::cout << find_header_position(line, 14) << std::endl;
+
     return 0;
 }
