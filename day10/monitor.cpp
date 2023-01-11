@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 
 class Monitor {
@@ -11,7 +12,8 @@ class Monitor {
 
     int cumulative_signal_strength = 0;
     bool draw = false;
-
+    int screenwidth = 40;
+    
     Monitor() {
       cycle = 1;
       X = 1;
@@ -30,7 +32,21 @@ class Monitor {
       cycle++;
     }
 
-    void draw_pixel() {}
+    void draw_pixel() {
+      int hor_pos = (cycle - 1) % screenwidth;
+      char draw_char;
+      if (std::abs(X - hor_pos) <= 1) {
+        draw_char = '#';
+      } else {
+        draw_char = '.';
+      }
+
+      std::cout << draw_char;
+      
+      if (hor_pos==screenwidth-1) {
+        std::cout << std::endl;
+      }
+    }
 
     void noop() {
       cycle_monitor();
@@ -64,6 +80,8 @@ void part_1() {
 
 void part_2() {
   Monitor monitor = Monitor();
+  monitor.draw = true;
+
   std::ifstream input("input.txt");
   std::string line, command;
   int argument;
@@ -77,10 +95,12 @@ void part_2() {
       monitor.addx(argument);
     }
   }
+
 }
 
 
 int main() {
   part_1();
+  part_2();
   return 0;
 }
