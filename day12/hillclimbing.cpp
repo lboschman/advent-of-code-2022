@@ -15,11 +15,13 @@ class Point {
     Point(int x, int y, int z) : x(x), y(y), z(z) {};
 
     Point(int x, int y, char c) : x(x), y(y) {
+      // Startpoint is 0, eindpoint = 27
       if (c=='S') {
         z = 0;
       } else if (c=='E') {
         z = 27;
       } else {
+        // 'a' should be offset by 1 from the start-point
         z = (c - 'a') + 1;
       }
     }
@@ -30,6 +32,7 @@ class Landscape {
     std::vector<std::vector<Point*> > grid;
 
     void add_point(Point* p) {
+      // if necessary, expand grid to accomodate new point
       while (grid.size() < p->x + 1) {
         grid.push_back(std::vector<Point*>());
       }
@@ -37,10 +40,13 @@ class Landscape {
         Point temp = Point();
         grid[p->x].push_back(&temp);
       }
+      // add point in grid
       grid[p->x][p->y] = p;
     }
 
     std::vector<Point*> find_neighbours(Point* p) {
+      // find all neighbours in cardinal directions
+      // beware of edge-cases
       std::vector<Point*> neighbours;
 
       if (p->x > 0)
@@ -61,6 +67,7 @@ class Landscape {
     }
 
     std::vector<Point*> find_accessible_neighbours(Point* p) {
+      // find all neighbours with a height-difference no more than 1
       std::vector<Point*> all_neighbours = find_neighbours(p);
 
       std::vector<Point*> acc_neighbours;
@@ -74,46 +81,41 @@ class Landscape {
     }
 
     std::vector<Point*> find_accessible_neighbours(int x, int y) {
+      // find all neighbours with a height-difference no more than 1
       return find_accessible_neighbours(grid[x][y]);
     }
-    
-
-
 };
 
 
 
 
-void part1() {
+Landscape* create_grid() {
   std::ifstream input("input.txt");
-  Landscape grid = Landscape();
+  Landscape *grid = new Landscape();
   std::string line;
   int linenumber = 0;
   
   while (getline(input, line)) {
     for (int i = 0; i < line.size(); i++)
     {
+      // convention: linenumber is y-coordinate
+      // position in line is x-coordinate
       Point *p = new Point(i, linenumber, line[i]);
-      grid.add_point(p);
+      grid->add_point(p);
     }
     linenumber++;
   }
 
-  Point *mp = grid.grid[0][0];
-  std::cout << mp->x << ", " << mp->y << std::endl;
-
-
-  // auto nb = grid.find_accessible_neighbours(7, 1);
-
-  // for (auto element : nb) {
-  //   std::cout << element->x << ", " << element->y << std::endl;
-  // }
-
-  
+  return grid;
 }
 
 
 int main() {
-  part1();
+  Landscape* ls = create_grid();
+  
+  // just a small check
+  Point *mp = ls->grid[0][0];
+  std::cout << mp->x << ", " << mp->y << ": " << mp->z << std::endl;
+
   return 0;
 }
