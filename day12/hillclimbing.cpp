@@ -9,27 +9,35 @@ class Point {
     int x;
     int y;
     int z;
+    char c;
+    bool visited = false;
+    // arbitrarily high value, but that way I won't have to check if distance
+    // has already been assigned.
+    int dist = 9001;
     
     Point() = default;
   
     Point(int x, int y, int z) : x(x), y(y), z(z) {};
 
-    Point(int x, int y, char c) : x(x), y(y) {
+    Point(int x, int y, char c) : x(x), y(y), c(c) {
       // Startpoint is 0, eindpoint = 27
       if (c=='S') {
-        z = 0;
+        z = 1;
       } else if (c=='E') {
-        z = 27;
+        z = 26;
       } else {
-        // 'a' should be offset by 1 from the start-point
+        //'a' should be at 1
         z = (c - 'a') + 1;
       }
     }
+
 };
 
 class Landscape {
   public:
     std::vector<std::vector<Point*> > grid;
+    std::vector<Point*> unvisited = {};
+    
 
     void add_point(Point* p) {
       // if necessary, expand grid to accomodate new point
@@ -85,12 +93,22 @@ class Landscape {
       return find_accessible_neighbours(grid[x][y]);
     }
 
+    std::vector<Point*> find_acc_unvisited_neighbours(Point *p) {
+      std::vector<Point*> acc_neighbours = find_accessible_neighbours(p);
+      std::vector<Point*> unvisited_neighbours = {};
+      for (Point *mp : acc_neighbours) {
+        if (! mp->visited) {unvisited_neighbours.push_back(mp);}
+      }
+
+      return unvisited_neighbours;
+    }
+
     Point* find_start_point() {
       Point* startpoint = nullptr;
 
       for (auto row : grid) {
         for (Point* p: row) {
-          if (p->z == 0) {
+          if (p->c == 'S') {
             startpoint = p;
           }
         }
@@ -103,7 +121,7 @@ class Landscape {
       Point* endpoint = nullptr;
       for (auto row : grid) {
         for (Point* p: row) {
-          if (p->z == 27) {
+          if (p->c == 'E') {
             endpoint = p;
           }
         }
@@ -111,9 +129,59 @@ class Landscape {
 
       return endpoint;
     }
+
+    void reset_points() {
+      for (auto row : grid) {
+        for (Point* p : row) {
+          p->visited = false;
+        }
+      }
+      // create the unvisited set
+      unvisited.clear();
+      for (auto row : grid) {
+        unvisited.insert( unvisited.end(), row.begin(), row.end());
+      }
+    }
+
+    static bool is_closer(const Point* p1, const Point* p2) {
+      return p1->dist < p2->dist;
+    }
+
+    int find_shortest_route() {
+      reset_points();
+      
+      Point *start, *current, *end;
+      start = find_start_point();
+      end = find_end_point();
+      start->dist = 0;
+      std::sort(unvisited.begin(), unvisited.end(), is_closer);
+
+      while (!end->visited) {
+        current = unvisited[0];
+        visit_node(current);
+      }
+      
+      return end->dist;
+    }
+
+    void visit_node(Point *p) {
+      std::vector<Point*> unvis_neighbours = find_acc_unvisited_neighbours(p);
+      // std::cout << "Visiting point " << p->x << ", " << p->y << std::endl;
+      for (Point *np : unvis_neighbours) {
+        if (np->dist > (p->dist + 1)) {
+          np->dist  = p->dist + 1;
+          // std::cout << "Point " << np->x << ", " << np->y << " set to dist: " << np->dist << std::endl;
+          // std::cin.get();
+        }
+        // np->dist = (np->dist > p->dist + 1) ? p->dist + 1 : np->dist;
+        
+      }
+      p->visited = true;
+      std::remove(unvisited.begin(), unvisited.end(), p);
+      std::sort(unvisited.begin(), unvisited.end(), is_closer);
+    }
+
 };
-
-
 
 
 Landscape* create_grid() {
@@ -146,6 +214,10 @@ int main() {
 
   mp = ls->find_end_point();
   std::cout << mp->x << ", " << mp->y << ": " << mp->z << std::endl;
+
+  int distance = ls->find_shortest_route();
+
+  std::cout << "Shortest route: " << distance << std::endl;
 
 
   return 0;
