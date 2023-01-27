@@ -84,6 +84,33 @@ class Landscape {
       // find all neighbours with a height-difference no more than 1
       return find_accessible_neighbours(grid[x][y]);
     }
+
+    Point* find_start_point() {
+      Point* startpoint = nullptr;
+
+      for (auto row : grid) {
+        for (Point* p: row) {
+          if (p->z == 0) {
+            startpoint = p;
+          }
+        }
+      }
+
+      return startpoint;
+    }
+
+    Point* find_end_point() {
+      Point* endpoint = nullptr;
+      for (auto row : grid) {
+        for (Point* p: row) {
+          if (p->z == 27) {
+            endpoint = p;
+          }
+        }
+      }
+
+      return endpoint;
+    }
 };
 
 
@@ -114,8 +141,12 @@ int main() {
   Landscape* ls = create_grid();
   
   // just a small check
-  Point *mp = ls->grid[0][0];
+  Point *mp = ls->find_start_point();
   std::cout << mp->x << ", " << mp->y << ": " << mp->z << std::endl;
+
+  mp = ls->find_end_point();
+  std::cout << mp->x << ", " << mp->y << ": " << mp->z << std::endl;
+
 
   return 0;
 }
