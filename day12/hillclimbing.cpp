@@ -29,6 +29,19 @@ class Point {
         //'a' should be at 1
         z = (c - 'a') + 1;
       }
+
+      if (c=='a') {
+        dist = 0;
+      }
+    }
+
+    void reset(bool any_a_point=false) {
+      visited = false;
+      int standard = 9001;
+      dist = (c=='S') ? 0 : 9001;
+      if (any_a_point) {
+        dist = (c=='a') ? 0 : 9001;
+      }
     }
 
 };
@@ -130,10 +143,10 @@ class Landscape {
       return endpoint;
     }
 
-    void reset_points() {
+    void reset_points(bool any_a_points=false) {
       for (auto row : grid) {
         for (Point* p : row) {
-          p->visited = false;
+          p->reset(any_a_points);
         }
       }
       // create the unvisited set
@@ -147,8 +160,8 @@ class Landscape {
       return p1->dist < p2->dist;
     }
 
-    int find_shortest_route() {
-      reset_points();
+    int find_shortest_route(bool make_hiking_trail=false) {
+      reset_points(make_hiking_trail);
       
       Point *start, *current, *end;
       start = find_start_point();
@@ -218,6 +231,11 @@ int main() {
   int distance = ls->find_shortest_route();
 
   std::cout << "Shortest route: " << distance << std::endl;
+
+  distance = ls->find_shortest_route(true);
+
+  std::cout << "Shortest hike : " << distance << std::endl;
+
 
 
   return 0;
