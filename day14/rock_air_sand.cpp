@@ -77,48 +77,68 @@ struct RockGrid {
     }
   }
 
-  int drop_block_sand(int origin_x, int origin_y) {
+  int drop_block_sand(int origin_x, int origin_y, bool infinite_bottom = false) {
     grid[origin_y][origin_x] = sand;
-    int response = move_block_sand(origin_x, origin_y);
-    dropped_sand += (1+response);
+    int response = move_block_sand(origin_x, origin_y, infinite_bottom);
+    if (response >= 0) {
+      dropped_sand++;
+    }
     return response;
   }
 
-  int move_block_sand(int x, int y) {
+  int move_block_sand(int x, int y, bool infinite_bottom = false) {
     // return values:
     // 1: block needs to move
     // 0: block cannot move, terminate
     // -1: block has fallen off the grid, terminate
 
     // overflow condition
-    if (y==grid.size() - 1) {
-      return -1;
+    if (y == grid.size() - 1) {
+      if (!infinite_bottom) {
+        return -1;
+      } else {
+        return y;
+      }
+    }
+
+    if (x == grid[0].size()-1) {
+      create_single_column();
     }
 
     // drop straight down
-    if (grid[y+1][x]==air) {
+    if (grid[y + 1][x] == air) {
       grid[y][x] = air;
-      grid[y+1][x] = sand;
-      return move_block_sand(x, y+1);
-    // if not straight down, move down-left (problem specification)
-    } else if (grid[y+1][x-1]==air) {
+      grid[y + 1][x] = sand;
+      return move_block_sand(x, y + 1, infinite_bottom);
+      // if not straight down, move down-left (problem specification)
+    } else if (grid[y + 1][x - 1] == air) {
       grid[y][x] = air;
-      grid[y+1][x-1] = sand;
-      return move_block_sand(x-1, y+1);
-    // if not down-left, move down-right (problem specification)
-    } else if (grid[y+1][x+1]==air) {
+      grid[y + 1][x - 1] = sand;
+      return move_block_sand(x - 1, y + 1, infinite_bottom);
+      // if not down-left, move down-right (problem specification)
+    } else if (grid[y + 1][x + 1] == air) {
       grid[y][x] = air;
-      grid[y+1][x+1] = sand;
-      return move_block_sand(x+1, y+1);
+      grid[y + 1][x + 1] = sand;
+      return move_block_sand(x + 1, y + 1, infinite_bottom);
     } else {
-      return 0;
+      if (infinite_bottom)
+        return y;
+      else
+        return 0;
     }
   }
 
-  void drop_all_sand(int origin_x, int origin_y) {
-    int overflow = 0;
-    while (overflow==0) {
-      overflow = drop_block_sand(origin_x, origin_y);
+  void drop_all_sand(int origin_x, int origin_y, bool infinite_bottom=false) {
+    if (!infinite_bottom){
+      int overflow = 0;
+      while (overflow == 0) {
+        overflow = drop_block_sand(origin_x, origin_y);
+      }
+    } else {
+      int diff = grid.size();
+      while (diff > 0) {
+        diff = drop_block_sand(origin_x, origin_y, infinite_bottom);
+      }
     }
   }
 
@@ -130,7 +150,6 @@ struct RockGrid {
       std::cout << std::endl;
     }
   }
-
 };
 
 RockGrid parse_input(std::string fname) {
@@ -169,8 +188,10 @@ RockGrid parse_input(std::string fname) {
 
 int main() {
   RockGrid canyon = parse_input("input.txt");
-  canyon.drop_all_sand(500, 0);
+  canyon.create_single_row();
+  canyon.drop_all_sand(500, 0, true);
 
   std::cout << "Dropped blocks of sand: " << canyon.dropped_sand << std::endl;
 
+  // canyon.print_grid();
 }
