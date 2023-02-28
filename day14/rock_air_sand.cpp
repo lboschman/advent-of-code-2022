@@ -193,5 +193,4 @@ int main() {
 
   std::cout << "Dropped blocks of sand: " << canyon.dropped_sand << std::endl;
 
-  // canyon.print_grid();
 }
